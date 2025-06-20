@@ -1,0 +1,313 @@
+swagger: "2.0"
+info:
+  x-ibm-name: oauth
+  title: OAuth
+  version: "3.0"
+  description: This is the <b>OAuth</b> service that can be called to return an OAuth
+    bearer token using the implicit OAuth flow.
+  license:
+    name: Terms and Conditions of Use
+    url: https://rapidlink.piraeusbank.gr/terms
+  contact:
+    name: rAPIdLink Support Team
+    email: rapidlink@piraeusbank.gr
+    url: https://rapidlink.piraeusbank.gr
+  termsOfService: <href a="https://rapidlink.piraeusbank.gr/terms">Terms and Conditions</href>
+schemes:
+- https
+consumes:
+- application/json
+produces:
+- application/json
+security: []
+x-ibm-configuration:
+  testable: true
+  enforced: true
+  phase: realized
+  type: oauth
+paths:
+  /oauth2/authorize:
+    get:
+      summary: endpoint for Authorization Code and Implicit grants
+      description: description
+      parameters:
+      - name: response_type
+        in: query
+        description: Request an authorization code or access token (implicit)
+        required: true
+        type: string
+        enum:
+        - code
+        - token
+      - name: client_id
+        in: query
+        description: Application client ID.
+        required: true
+        type: string
+      - name: scope
+        in: query
+        description: Scope being requested.
+        type: string
+        required: true
+      - name: redirect_uri
+        in: query
+        type: string
+        description: URI to where the user is redirected after authorization.
+        required: false
+      - name: state
+        in: query
+        type: string
+        description: This string will be echoed back to application when the user
+          is redirected.
+        required: false
+      responses:
+        200:
+          description: An HTML form for authentication or authorization of this request.
+        302:
+          description: |
+            Redirect to the clients redirect_uri containing one of the following
+            - **authorization code** for Authorization code grant
+            - **access token** for Implicity grant
+            - **error** in case of errors, such as the user has denied the request
+    post:
+      summary: submit approval to authorization code or access token
+      description: |
+        Submit resource owners approval (or rejection) for the OAuth2 Server to issue an
+        authorization code or access token to the application.
+      parameters:
+      - name: client_id
+        in: formData
+        description: application requesting the access code or token
+        required: true
+        type: string
+      - name: scope
+        in: formData
+        description: requested scope of this authorization
+        required: true
+        type: string
+      - name: resource-owner
+        in: formData
+        description: resource owners user name
+        required: true
+        type: string
+      - name: redirect_uri
+        in: formData
+        description: URI the application is requesting this code or token to be redirected
+          to
+        required: true
+        type: string
+      - name: original-url
+        in: formData
+        description: URL of the original authorization request
+        required: true
+        type: string
+      - name: dp-state
+        in: formData
+        description: state information provided in the authorization form
+        required: true
+        type: string
+      - name: dp-data
+        in: formData
+        description: state information provided in the authorization form
+        required: true
+        type: string
+      responses:
+        200:
+          description: Cool
+  /oauth2/token:
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      summary: Request Access Tokens
+      description: This endpoint allows requesting an access token following one of
+        the flows below:- Authorization Code (exchange code for access token)- Client
+        Credentials (2-legged, there is no resource owner information)- Resource Owner
+        Password Credentials (2-legged, client provides resource owner name and password)-
+        Refresh Token (exchange refresh token for a new access code). The table below
+        indicates the required parameters for each specific grant_type options. Empty
+        cells indicate a parameter is ignored for that specific grant type. Client
+        authentication:- Confidential clients should authenticate using HTTP Basic
+        Authentication. Alternatively, they may post  their client_id and client_secret
+        information as a formData parameter. - Public clients should send their client_id
+        as formData parameter.| grant_type           | code       | client_credentials
+        | password    | refresh_token ||----------------------|------------|--------------------|-------------|---------------||
+        client_id            | required*  | required*          | required*   | required*     ||
+        client_secret        | required*  | required*          | required*   | required*     ||
+        code                 | required   |                    |             |               ||
+        redirect_uri         | required   |                    |             |               ||
+        username             |            |                    | required    |               ||
+        password             |            |                    | required    |               ||
+        scope                |            | optional           | optional    |               ||
+        refresh_token        |            |                    |             | required      |The
+        implicit grant requests, see /oauth2/authorize.
+      security: []
+      parameters:
+      - name: grant_type
+        in: formData
+        description: Type of grant.
+        type: string
+        required: true
+        enum:
+        - authorization_code
+        - password
+        - client_credentials
+        - refresh_token
+      - name: client_id
+        in: formData
+        description: Application client ID, may be provided either within formData
+          or using HTTP Basic Authentication.
+        required: false
+        type: string
+      - name: client_secret
+        in: formData
+        description: Application secret, may be provided either within formData or
+          using HTTP Basic Authentication.
+        required: false
+        type: string
+      - name: code
+        in: formData
+        description: Authorization code provided by the /oauth2/authorize endpoint.
+        required: false
+        type: string
+      - name: redirect_uri
+        in: formData
+        description: Required only if the redirect_uri parameter was included in the
+          authorization request /oauth2/authorize. Their values MUST be identical.
+        required: false
+        type: string
+      - name: username
+        in: formData
+        type: string
+        description: Resource owner username.
+        required: false
+      - name: password
+        in: formData
+        type: string
+        description: Resource owner password.
+        required: false
+      - name: scope
+        in: formData
+        type: string
+        description: Scope being requested.
+        required: false
+      - name: refresh_token
+        in: formData
+        type: string
+        description: The refresh token that the client wants to exchange for a new
+          access token (refresh_token grant_type).
+        required: false
+      responses:
+        200:
+          description: JSON document containing token, etc.
+          schema:
+            $ref: '#/definitions/access_token_response'
+        400:
+          description: JSON document that may contain additional details about the
+            failure.
+  /oauth2/introspect:
+    post:
+      summary: Introspect a given access_token supported
+      description: |
+        This endpoint introspects a given access_token
+      parameters:
+      - name: token
+        in: formData
+        description: String value of the access_token to be introspected
+        required: true
+        type: string
+      - name: token_type_hint
+        in: formData
+        description: This must contain 'access_token' to indicate the token type
+        required: true
+        type: string
+      responses:
+        200:
+          description: json document containing access_token information, etc.
+          schema:
+            $ref: '#/definitions/introspect_response'
+        401:
+          description: failure
+definitions:
+  access_token_response:
+    type: object
+    additionalProperties: false
+    required:
+    - token_type
+    - access_token
+    - expires_in
+    properties:
+      token_type:
+        enum:
+        - bearer
+        type: string
+      access_token:
+        type: string
+      expires_in:
+        type: integer
+      scope:
+        type: string
+      refresh_token:
+        type: string
+      metadata:
+        properties: []
+        type: string
+  introspect_response:
+    type: object
+    additionalProperties: false
+    required:
+    - active
+    - client_id
+    - client_name
+    - username
+    - sub
+    - exp
+    - expstr
+    - iat
+    - nbf
+    - nbfstr
+    - scope
+    properties:
+      active:
+        type: boolean
+      client_id:
+        type: string
+      client_name:
+        type: string
+      username:
+        type: string
+      sub:
+        type: string
+      exp:
+        type: string
+      expstr:
+        type: string
+      iat:
+        type: string
+      nbf:
+        type: string
+      nbfstr:
+        type: string
+      scope:
+        type: string
+      miscinfo:
+        type: string
+      consented_on:
+        type: string
+      consented_on_str:
+        type: string
+      grant_type:
+        type: string
+basePath: /v3/oauth
+tags:
+- name: Security
+  description: This is an API that is related to security. The IBM OAuth provider
+    is only used in the sandbox enviroments
+externalDocs:
+  url: https://rapidlink.piraeusbank.gr/node/151
+  description: Getting Started
+x-ibm-endpoints:
+- endpointUrl: https://api.rapidlink.piraeusbank.gr/piraeusbank/production
+  description: Base Gateway API Endpoint
+  type:
+  - production
+  - development

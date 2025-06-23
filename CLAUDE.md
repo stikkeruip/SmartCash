@@ -43,6 +43,10 @@ Or use Python/pip directly:
 - Git repository initialized
 - Using Windows-style virtual environment paths
 
+## Development Progress
+- **Project Vision**: See `docs/smartcash-project-vision.md` for complete project overview and technical decisions
+- **Development Checklist**: See `docs/smartcash-development-checklist.md` for detailed task tracking and project phases
+
 ## Important Guidelines
 - **ALWAYS follow best practices** - Never choose simple solutions over best practices. Always implement industry-standard patterns, security measures, and code quality standards
 - **NEVER use mock data** - Always use real data and actual implementations
@@ -53,6 +57,7 @@ Or use Python/pip directly:
 
 ### Technical API Specifications (Use First)
 - **`docs/piraeus-bank-api/oauth-swagger.yaml`** - Complete OAuth2 API specification with endpoints, parameters, and schemas
+- **`docs/piraeus-bank-api/psd2-ais-swagger.yaml`** - Comprehensive PSD2 AIS API specification with all endpoints, headers, parameters, and response schemas
 
 ### Implementation Guides (Use for Context)
 - **`docs/piraeus-bank-api/oauth-flows-guide.md`** - OAuth2 flows, environment configs, SCA patterns, and integration guidance
@@ -77,6 +82,15 @@ Or use Python/pip directly:
 3. **Reference** `error-handling-guide.md` for SCA and error handling patterns
 
 **For PSD2 API Integration:**
-1. **Start with** respective quickstart guides for step-by-step implementation
-2. **Use** detailed examples for complex scenarios
-3. **Reference** sandbox guides for testing environment setup
+1. **Start with** `psd2-ais-swagger.yaml` for complete API specification (endpoints, headers, parameters, schemas)
+2. **Use** respective quickstart guides for step-by-step implementation
+3. **Use** detailed examples for complex scenarios
+4. **Reference** sandbox guides for testing environment setup
+
+## Plan Mode Guidelines
+When in plan mode:
+- Focus on brainstorming and discussion only
+- Do NOT suggest implementations or ask to implement after every response
+- Wait for explicit user request before proposing any implementation plans
+- Keep responses focused on answering questions and exploring ideas
+- User will explicitly ask when they want something implemented

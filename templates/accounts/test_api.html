@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SmartCash API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .form-section { margin-bottom: 40px; padding: 20px; border: 1px solid #ccc; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input { width: 300px; padding: 8px; border: 1px solid #ddd; }
+        button { padding: 10px 20px; background: #007cba; color: white; border: none; cursor: pointer; }
+        button:hover { background: #005a87; }
+        .result { margin-top: 15px; padding: 10px; background: #f0f0f0; white-space: pre-wrap; }
+        .error { background: #ffebee; color: #c62828; }
+        .success { background: #e8f5e8; color: #2e7d2e; }
+    </style>
+</head>
+<body>
+    <h1>SmartCash API Test Interface</h1>
+
+    <!-- Registration Form -->
+    <div class="form-section">
+        <h2>Register New User</h2>
+        <form id="registerForm">
+            <div class="form-group">
+                <label>Username:</label>
+                <input type="text" id="reg_username" required>
+            </div>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="reg_email" required>
+            </div>
+            <div class="form-group">
+                <label>First Name:</label>
+                <input type="text" id="reg_first_name" required>
+            </div>
+            <div class="form-group">
+                <label>Last Name:</label>
+                <input type="text" id="reg_last_name" required>
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="reg_password" required>
+            </div>
+            <div class="form-group">
+                <label>Confirm Password:</label>
+                <input type="password" id="reg_password_confirm" required>
+            </div>
+            <button type="submit">Register</button>
+        </form>
+        <div id="registerResult" class="result" style="display:none;"></div>
+    </div>
+
+    <!-- Login Form -->
+    <div class="form-section">
+        <h2>Login User</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label>Username or Email:</label>
+                <input type="text" id="login_username" required>
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="login_password" required>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+        <div id="loginResult" class="result" style="display:none;"></div>
+    </div>
+
+    <!-- Token Storage -->
+    <div class="form-section">
+        <h3>Current Token</h3>
+        <p>Token: <span id="currentToken">None</span></p>
+        <button onclick="clearToken()">Clear Token</button>
+    </div>
+
+    <!-- Profile Form -->
+    <div class="form-section">
+        <h2>Get/Update Profile (Requires Token)</h2>
+        <button onclick="getProfile()">Get Profile</button>
+        <form id="profileForm" style="margin-top: 15px;">
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="profile_email">
+            </div>
+            <div class="form-group">
+                <label>First Name:</label>
+                <input type="text" id="profile_first_name">
+            </div>
+            <div class="form-group">
+                <label>Last Name:</label>
+                <input type="text" id="profile_last_name">
+            </div>
+            <div class="form-group">
+                <label>Phone Number:</label>
+                <input type="text" id="profile_phone">
+            </div>
+            <button type="submit">Update Profile</button>
+        </form>
+        <div id="profileResult" class="result" style="display:none;"></div>
+    </div>
+
+    <!-- Personal Information -->
+    <div class="form-section">
+        <h2>Personal Information (Requires Token)</h2>
+        <button onclick="getPersonalInfo()">Get Personal Info</button>
+        <form id="personalInfoForm" style="margin-top: 15px;">
+            <div class="form-group">
+                <label>Date of Birth:</label>
+                <input type="date" id="personal_dob">
+            </div>
+            <div class="form-group">
+                <label>Phone Number:</label>
+                <input type="text" id="personal_phone">
+            </div>
+            <div class="form-group">
+                <label>Address Line 1:</label>
+                <input type="text" id="personal_address1">
+            </div>
+            <div class="form-group">
+                <label>Address Line 2:</label>
+                <input type="text" id="personal_address2">
+            </div>
+            <div class="form-group">
+                <label>City:</label>
+                <input type="text" id="personal_city">
+            </div>
+            <div class="form-group">
+                <label>Postal Code:</label>
+                <input type="text" id="personal_postal">
+            </div>
+            <div class="form-group">
+                <label>Country (2-letter code):</label>
+                <input type="text" id="personal_country" maxlength="2" placeholder="GR, US, DE, etc.">
+            </div>
+            <button type="submit">Update Personal Info</button>
+        </form>
+        <div id="personalInfoResult" class="result" style="display:none;"></div>
+    </div>
+
+    <!-- Bank Options -->
+    <div class="form-section">
+        <h2>Available Banks (Requires Token)</h2>
+        <button onclick="getBankOptions()">Get Available Banks</button>
+        <div id="bankOptionsResult" class="result" style="display:none;"></div>
+    </div>
+
+    <!-- Piraeus Bank Linking -->
+    <div class="form-section">
+        <h2>Piraeus Bank Linking (Requires Token)</h2>
+        <button onclick="getPiraeusStatus()">Get Piraeus Status</button>
+        <form id="piraeusLinkForm" style="margin-top: 15px;">
+            <div class="form-group">
+                <label>Piraeus Customer ID:</label>
+                <input type="text" id="piraeus_customer_id" required>
+            </div>
+            <div class="form-group">
+                <label>Preferred SCA Method:</label>
+                <select id="piraeus_sca_method">
+                    <option value="SMS">SMS</option>
+                    <option value="EMAIL">Email</option>
+                    <option value="APP">Mobile App</option>
+                    <option value="PUSH">Push Notification</option>
+                </select>
+            </div>
+            <button type="submit">Link Piraeus Account</button>
+        </form>
+        <button onclick="unlinkPiraeus()" style="background: #d32f2f; margin-top: 10px;">Unlink Piraeus Account</button>
+        <div id="piraeusResult" class="result" style="display:none;"></div>
+    </div>
+
+    <!-- Logout -->
+    <div class="form-section">
+        <h2>Logout (Requires Token)</h2>
+        <button onclick="logout()">Logout</button>
+        <div id="logoutResult" class="result" style="display:none;"></div>
+    </div>
+
+    <!-- Delete Account -->
+    <div class="form-section">
+        <h2 style="color: #d32f2f;">⚠️ Delete Account (Requires Token)</h2>
+        <p style="color: #d32f2f; font-weight: bold;">WARNING: This action is permanent and cannot be undone!</p>
+        <button onclick="deleteAccount()" style="background: #d32f2f;">Delete My Account Permanently</button>
+        <div id="deleteResult" class="result" style="display:none;"></div>
+    </div>
+
+    <script>
+        let currentToken = localStorage.getItem('smartcash_token') || null;
+        document.getElementById('currentToken').textContent = currentToken || 'None';
+
+        // Helper function to make API calls
+        async function apiCall(url, method, data = null, useToken = false) {
+            const headers = {
+                'Content-Type': 'application/json',
+            };
+            
+            if (useToken && currentToken) {
+                headers['Authorization'] = `Token ${currentToken}`;
+            }
+
+            const config = {
+                method: method,
+                headers: headers,
+            };
+
+            if (data) {
+                config.body = JSON.stringify(data);
+            }
+
+            try {
+                const response = await fetch(url, config);
+                const result = await response.json();
+                return { success: response.ok, data: result, status: response.status };
+            } catch (error) {
+                return { success: false, data: { error: error.message }, status: 0 };
+            }
+        }
+
+        // Register form
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                username: document.getElementById('reg_username').value,
+                email: document.getElementById('reg_email').value,
+                first_name: document.getElementById('reg_first_name').value,
+                last_name: document.getElementById('reg_last_name').value,
+                password: document.getElementById('reg_password').value,
+                password_confirm: document.getElementById('reg_password_confirm').value,
+            };
+
+            const result = await apiCall('/api/auth/register/', 'POST', data);
+            const resultDiv = document.getElementById('registerResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = `result ${result.success ? 'success' : 'error'}`;
+            resultDiv.textContent = JSON.stringify(result.data, null, 2);
+
+            if (result.success && result.data.token) {
+                currentToken = result.data.token;
+                localStorage.setItem('smartcash_token', currentToken);
+                document.getElementById('currentToken').textContent = currentToken;
+            }
+        });
+
+        // Login form
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                username_or_email: document.getElementById('login_username').value,
+                password: document.getElementById('login_password').value,
+            };
+
+            const result = await apiCall('/api/auth/login/', 'POST', data);
+            const resultDiv = document.getElementById('loginResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = `result ${result.success ? 'success' : 'error'}`;
+            resultDiv.textContent = JSON.stringify(result.data, null, 2);
+
+            if (result.success && result.data.token) {
+                currentToken = result.data.token;
+                localStorage.setItem('smartcash_token', currentToken);
+                document.getElementById('currentToken').textContent = currentToken;
+            }
+        });
+
+        // Get profile
+        async function getProfile() {
+            const result = await apiCall('/api/auth/profile/', 'GET', null, true);
+            const resultDiv = document.getElementById('profileResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = `result ${result.success ? 'success' : 'error'}`;
+            resultDiv.textContent = JSON.stringify(result.data, null, 2);
+
+            if (result.success) {
+                document.getElementById('profile_email').value = result.data.email || '';
+                document.getElementById('profile_first_name').value = result.data.first_name || '';
+                document.getElementById('profile_last_name').value = result.data.last_name || '';
+                document.getElementById('profile_phone').value = result.data.phone_number || '';
+            }
+        }
+
+        // Update profile form
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                email: document.getElementById('profile_email').value,
+                first_name: document.getElementById('profile_first_name').value,
+                last_name: document.getElementById('profile_last_name').value,
+                phone_number: document.getElementById('profile_phone').value,
+            };
+
+            const result = await apiCall('/api/auth/profile/', 'PUT', data, true);
+            const resultDiv = document.getElementById('profileResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = `result ${result.success ? 'success' : 'error'}`;
+            resultDiv.textContent = JSON.stringify(result.data, null, 2);
+        });
+
+        // Logout
+        async function logout() {
+            const result = await apiCall('/api/auth/logout/', 'POST', {}, true);
+            const resultDiv = document.getElementById('logoutResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = `result ${result.success ? 'success' : 'error'}`;
+            resultDiv.textContent = JSON.stringify(result.data, null, 2);
+
+            if (result.success) {
+                clearToken();
+            }
+        }
+
+        // Delete account
+        async function deleteAccount() {
+            if (!confirm('Are you sure you want to permanently delete your account? This action cannot be undone!')) {
+                return;
+            }
+            
+            if (!confirm('This will permanently delete all your data. Are you absolutely sure?')) {
+                return;
+            }
+
+            const result = await apiCall('/api/auth/delete-account/', 'DELETE', null, true);
+            const resultDiv = document.getElementById('deleteResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = `result ${result.success ? 'success' : 'error'}`;
+            resultDiv.textContent = JSON.stringify(result.data, null, 2);
+
+            if (result.success) {
+                clearToken();
+                alert('Your account has been permanently deleted.');
+            }
+        }
+
+        // Get personal info
+        async function getPersonalInfo() {
+            const result = await apiCall('/api/auth/personal-info/', 'GET', null, true);
+            const resultDiv = document.getElementById('personalInfoResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = `result ${result.success ? 'success' : 'error'}`;
+            resultDiv.textContent = JSON.stringify(result.data, null, 2);
+
+            if (result.success) {
+                document.getElementById('personal_dob').value = result.data.date_of_birth || '';
+                document.getElementById('personal_phone').value = result.data.phone_number || '';
+                document.getElementById('personal_address1').value = result.data.address_line1 || '';
+                document.getElementById('personal_address2').value = result.data.address_line2 || '';
+                document.getElementById('personal_city').value = result.data.city || '';
+                document.getElementById('personal_postal').value = result.data.postal_code || '';
+                document.getElementById('personal_country').value = result.data.country || '';
+            }
+        }
+
+        // Update personal info form
+        document.getElementById('personalInfoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                date_of_birth: document.getElementById('personal_dob').value,
+                phone_number: document.getElementById('personal_phone').value,
+                address_line1: document.getElementById('personal_address1').value,
+                address_line2: document.getElementById('personal_address2').value,
+                city: document.getElementById('personal_city').value,
+                postal_code: document.getElementById('personal_postal').value,
+                country: document.getElementById('personal_country').value,
+            };
+
+            const result = await apiCall('/api/auth/personal-info/', 'PUT', data, true);
+            const resultDiv = document.getElementById('personalInfoResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = `result ${result.success ? 'success' : 'error'}`;
+            resultDiv.textContent = JSON.stringify(result.data, null, 2);
+        });
+
+        // Get bank options
+        async function getBankOptions() {
+            const result = await apiCall('/api/bank/', 'GET', null, true);
+            const resultDiv = document.getElementById('bankOptionsResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = `result ${result.success ? 'success' : 'error'}`;
+            resultDiv.textContent = JSON.stringify(result.data, null, 2);
+        }
+
+        // Get Piraeus status
+        async function getPiraeusStatus() {
+            const result = await apiCall('/api/bank/piraeus/', 'GET', null, true);
+            const resultDiv = document.getElementById('piraeusResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = `result ${result.success ? 'success' : 'error'}`;
+            resultDiv.textContent = JSON.stringify(result.data, null, 2);
+
+            if (result.success && result.data.is_linked) {
+                document.getElementById('piraeus_customer_id').value = result.data.customer_id || '';
+                document.getElementById('piraeus_sca_method').value = result.data.preferred_sca_method || 'SMS';
+            }
+        }
+
+        // Link Piraeus form
+        document.getElementById('piraeusLinkForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                piraeus_customer_id: document.getElementById('piraeus_customer_id').value,
+                preferred_sca_method: document.getElementById('piraeus_sca_method').value,
+            };
+
+            const result = await apiCall('/api/bank/piraeus/', 'POST', data, true);
+            const resultDiv = document.getElementById('piraeusResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = `result ${result.success ? 'success' : 'error'}`;
+            resultDiv.textContent = JSON.stringify(result.data, null, 2);
+        });
+
+        // Unlink Piraeus
+        async function unlinkPiraeus() {
+            if (!confirm('Are you sure you want to unlink your Piraeus Bank account?')) {
+                return;
+            }
+
+            const result = await apiCall('/api/bank/piraeus/', 'DELETE', null, true);
+            const resultDiv = document.getElementById('piraeusResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = `result ${result.success ? 'success' : 'error'}`;
+            resultDiv.textContent = JSON.stringify(result.data, null, 2);
+
+            if (result.success) {
+                document.getElementById('piraeus_customer_id').value = '';
+                document.getElementById('piraeus_sca_method').value = 'SMS';
+            }
+        }
+
+        // Clear token
+        function clearToken() {
+            currentToken = null;
+            localStorage.removeItem('smartcash_token');
+            document.getElementById('currentToken').textContent = 'None';
+        }
+    </script>
+</body>
+</html>
